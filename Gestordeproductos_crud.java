@@ -1,49 +1,70 @@
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
-package com.mycompany.gestordeproductos_crud;
+package gestordeproductos_crud_completo;
 
 import java.util.Scanner;
 
-/**
- *
- * @author Usuario
- */
 public class Gestordeproductos_crud {
 
     static String[] nombres = new String[5];
     static double[] precios = new double[5];
     static int contador = 0;
 
+    static final int rol_administrador = 1;
+    static final int rol_usuario = 2;
+    static final int SALIR = 3;
+
     public static void main(String[] args) {
-        
 
         Scanner sc = new Scanner(System.in);
-        int opcion = 0;
+
+        int rol;
+        int opcion;
+        while(true){
+        
+        System.out.println("\n--- Seleccione su rol ---");
+        System.out.println("1. Administrador");
+        System.out.println("2. Usuario");
+        System.out.println("3. Salir");
+        System.out.print("Opcion: ");
+        
+        rol = sc.nextInt();
+        sc.nextLine();
+
+        
+        if (rol == SALIR) {
+            System.out.println("Saliendo del programa...");
+            sc.close();
+            return;
+        }
+
+        
+        if (rol != rol_administrador && rol != rol_usuario) {
+            System.out.println("Rol no valido.");
+            sc.close();
+            return;
+        }
 
         do {
-            System.out.println("\n--- Menu de la empresa productos ---");
-            System.out.println("1. Agregar (Create)");
-            System.out.println("2. Listar");
-            System.out.println("3. Buscar");
-            System.out.println("4. Actualizar");
-            System.out.println("5. Eliminar");
-            System.out.println("0. Salir");
 
-            System.out.println("Seleccione una opcion:");
+            mostrarMenu(rol);
 
+            System.out.print("Seleccione una opcion: ");
             opcion = sc.nextInt();
             sc.nextLine();
+
+            // Restricciones para el usuario
+            if (rol == rol_usuario&& opcion != 0 && opcion != 2 && opcion != 3) {
+                System.out.println("Acceso denegado. El usuario solo puede listar y buscar.");
+                continue;
+            }
 
             switch (opcion) {
 
                 case 1 -> {
-                    System.out.println("Nombre del producto:");
+                    System.out.print("Nombre del producto: ");
                     String nombre = sc.nextLine();
 
-                    System.out.println("Precio del producto:");
+                    System.out.print("Precio del producto: ");
                     double precio = sc.nextDouble();
                     sc.nextLine();
 
@@ -58,13 +79,13 @@ public class Gestordeproductos_crud {
                     System.out.print("Nombre a buscar: ");
                     String nombre = sc.nextLine();
 
-                    int idx = buscar(nombre);
+                    int indice = buscar(nombre);
 
-                    System.out.println(
-                            idx == -1
-                            ? "No encontrado."
-                            : "Encontrado en posición " + idx
-                    );
+                    if (indice == -1) {
+                        System.out.println("Producto no encontrado.");
+                    } else {
+                        System.out.println("Encontrado en posicion " + indice);
+                    }
                 }
 
                 case 4 -> {
@@ -72,10 +93,10 @@ public class Gestordeproductos_crud {
                     String nombre = sc.nextLine();
 
                     System.out.print("Nuevo precio: ");
-                    double nuevo = sc.nextDouble();
+                    double nuevoPrecio = sc.nextDouble();
                     sc.nextLine();
 
-                    actualizarPrecio(nombre, nuevo);
+                    actualizarPrecio(nombre, nuevoPrecio);
                 }
 
                 case 5 -> {
@@ -84,6 +105,10 @@ public class Gestordeproductos_crud {
 
                     eliminar(nombre);
                 }
+                
+                case 6 -> {
+                        System.out.println("Regresando a seleccion de rol...");
+                    }
 
                 case 0 -> {
                     System.out.println("Saliendo del programa...");
@@ -94,23 +119,58 @@ public class Gestordeproductos_crud {
                 }
             }
 
-        } while (opcion != 0);
+        } while (opcion != 0 && opcion != 6); // sale del menu si elige 0 o 6
+
+            // Si eligio 0, termina todo el programa
+            if (opcion == 0) {
+                break;
+            }
+
+            // Si eligio 6, el bucle externo continua y vuelve a pedir el rol
+        }
 
         sc.close();
+    }
+    
+
+    static void mostrarMenu(int rol) {
+
+        System.out.println("\n--- Menu de Productos ---");
+
+        if (rol == rol_administrador) {
+
+            System.out.println("Rol: Administrador");
+            System.out.println("1. Agregar");
+            System.out.println("2. Listar");
+            System.out.println("3. Buscar");
+            System.out.println("4. Actualizar");
+            System.out.println("5. Eliminar");
+            System.out.println("6.Salir de administrador");
+            System.out.println("0. Salir");
+            
+
+        } else {
+
+            System.out.println("Rol: Usuario");
+            System.out.println("2. Listar");
+            System.out.println("3. Buscar");
+            System.out.println("0.salir");
+        }
     }
 
     static boolean agregar(String nombre, double precio) {
 
         if (contador >= nombres.length) {
-
-            System.out.println("No hay espacio en el vector para almacenar mas elementos");
-
+            System.out.println("No hay espacio para mas productos.");
             return false;
         }
 
         nombres[contador] = nombre;
         precios[contador] = precio;
+
         contador++;
+
+        System.out.println("Producto agregado correctamente.");
 
         return true;
     }
@@ -118,12 +178,12 @@ public class Gestordeproductos_crud {
     static void Listar() {
 
         if (contador == 0) {
-            System.out.println("No hay productos registrados");
+            System.out.println("No hay productos registrados.");
             return;
         }
 
         for (int i = 0; i < contador; i++) {
-            System.out.println(i + " " + nombres[i] + " - $ " + precios[i]);
+            System.out.println(i + ". " + nombres[i] + " - $" + precios[i]);
         }
     }
 
